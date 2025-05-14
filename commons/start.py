@@ -15,14 +15,14 @@ def start_instance() -> None:
     AWS = AWSUtils(ec2)
 
     try:
-        if AWS.is_instance_running(ec2, config["INSTANCE_ID"]):
+        if AWS.is_instance_running( config["INSTANCE_ID"] ):
             print("Instância já está iniciada.")
             return
         
-        AWS.start_instance(ec2, config["INSTANCE_ID"])
+        AWS.start_instance( config["INSTANCE_ID"] )
         print("Instância iniciada.")
 
-        ip: str = AWS.wait_for_instance_ip(ec2, config["INSTANCE_ID"])
+        ip: str = AWS.wait_for_instance_ip( config["INSTANCE_ID"] )
         print(f"IP da instância: {ip}")
 
     except Exception as e:
@@ -38,12 +38,12 @@ def start_server() -> None:
     AWS: AWSUtils   = AWSUtils(ec2)
     
     try:
-        if not AWS.is_instance_running(ec2, config["INSTANCE_ID"]):
+        if not AWS.is_instance_running( config["INSTANCE_ID"] ):
             print("Instância está parada.")
             return
         print("Instância está rodando.")
         
-        ip: str = AWS.get_instance_ip(ec2, config["INSTANCE_ID"])
+        ip: str = AWS.get_instance_ip( config["INSTANCE_ID"] )
         if ip == "IP não encontrado": raise ValueError("Não foi possível obter o IP da instância.")
  
         print("Conectando ao servidor...")

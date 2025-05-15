@@ -10,6 +10,11 @@ class Options(Enum):
     SERVIDOR = "2"
     CRIAR_ENV = "3"
 
+class MenuType(Enum):
+    """Tipos de menu disponíveis."""
+    INSTANCIA = "instancia"
+    SERVIDOR = "servidor"
+
 class Menu:
     def __init__(self):
         self.instance_commands: Dict[str, Callable] = {
@@ -22,13 +27,28 @@ class Menu:
             "2": self.stop_server,
             "3": self.check_server_status
         }
-        self.SELECTED_GAME: Optional[str] = None
+        self._selected_game: Optional[str] = None
+
+
+    @property
+    def selected_game(self) -> Optional[str]:
+        """Retorna o jogo atualmente selecionado."""
+        return self._selected_game
+    
+    @selected_game.setter
+    def selected_game(self, game: str) -> None:
+        """Define o jogo atualmente selecionado."""
+        self._selected_game = game
+        set_selected_game(game)
+        
 
     @staticmethod
     def clear_screen() -> None:
+        """Limpa a tela do terminal."""
         os.system('cls' if os.name == 'nt' else 'clear')
 
     def show_header(self, title: str) -> None:
+        """Exibe o cabeçalho do menu."""
         print("=" * 50)
         print(f"{title.center(48)}")
         print("=" * 50)
@@ -40,7 +60,8 @@ class Menu:
         print("=" * 50)
 
     def show_main_menu(self) -> None:
-        self.show_header(f"MENU PRINCIPAL - {self.SELECTED_GAME.upper()}")
+        """Exibe o menu principal."""
+        self.show_header(f"MENU PRINCIPAL - {self.selected_game.upper()}")
         print("1. Gerenciar instância EC2")
         print("2. Gerenciar servidor")
         print("3. Criar .env")
@@ -48,7 +69,8 @@ class Menu:
         print("=" * 50)
 
     def show_submenu(self, menu_type: str) -> None:
-        self.show_header(f"SUBMENU - {menu_type.upper()} - {self.SELECTED_GAME.upper()}")
+        """Exibe o submenu de gerenciamento de instância ou servidor."""
+        self.show_header(f"SUBMENU - {menu_type.upper()} - {self.selected_game.upper()}")
         
         if menu_type == "instancia":
             print("1. Iniciar instância EC2")
@@ -63,42 +85,59 @@ class Menu:
         print("=" * 50)
 
     def select_game(self) -> bool:
+        """Permite ao usuário selecionar um jogo."""
         self.clear_screen()
         self.show_game_selection()
         choice = input("\nEscolha o jogo: ")
         
         if choice == "1":
             set_selected_game("Zomboid")
-            self.SELECTED_GAME = "Zomboid"
+            self.selected_game = "Zomboid"
             return True
         elif choice == "2":
             set_selected_game("Minecraft")
-            self.SELECTED_GAME = "Minecraft"
+            self.selected_game = "Minecraft"
             return True
         
         print("Opção inválida.")
         return False
-
-    def handle_submenu(self, menu_type: str) -> None:
-        commands = self.instance_commands if menu_type == "instancia" else self.server_commands
+    
+    def set_commands(self, menu_type: MenuType) -> Dict[str, Callable]:
+        """Define os comandos disponíveis para o submenu selecionado."""
+        if menu_type == MenuType.INSTANCIA:
+            return self.instance_commands
+        elif menu_type == MenuType.SERVIDOR:
+            return self.server_commands
+        else:
+            raise ValueError(f"Tipo de menu não suportado: {menu_type}")
         
-        while True:
-            self.clear_screen()
-            self.show_submenu(menu_type)
-            choice = input("\nEscolha uma opção: ")
-            
-            if choice == "0":
-                break
+    def handle_submenu(self, menu_type: str) -> None:
+        """Gerencia o submenu selecionado."""        
+        try:
+            menu_enum = MenuType(menu_type)
+            commands = self.set_commands(menu_enum)
+
+            while True:
+                self.clear_screen()
+                self.show_submenu(menu_type)
+                choice = input("\nEscolha uma opção: ")
                 
-            if choice in commands:
-                try:
-                    print("\nExecutando operação...")
-                    commands[choice]()
-                except Exception as e:
-                    print(f"\nErro: {e}")
-            else:
-                print("Opção inválida.")
-                
+                if choice == "0":
+                    break
+                    
+                if choice in commands:
+                    try:
+                        print("\nExecutando operação...")
+                        commands[choice]()
+                    except Exception as e:
+                        print(f"\nErro: {e}")
+                else:
+                    print("Opção inválida.")
+                    
+                input("\nPressione ENTER para continuar...")
+
+        except ValueError:
+            print(f"Tipo de menu inválido: {menu_type}")
             input("\nPressione ENTER para continuar...")
 
     def start_instance(self):
@@ -126,5 +165,9 @@ class Menu:
         commons.status.check_server_status()
 
     def create_env(self):
-        import commons.configs.configs
-        commons.configs.configs.generate_env_file()
+        try:
+            from commons.configs.configs import generate_env_file
+            generate_env_file()
+            print("\nArquivo .env gerado com sucesso!")
+        except Exception as e:
+            print(f"\nErro ao gerar arquivo .env: {e}")

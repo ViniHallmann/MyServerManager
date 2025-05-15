@@ -1,6 +1,14 @@
 import os
+from enum import Enum
 from typing import Dict, Callable, Optional
 from variables.globals import set_selected_game, get_selected_game
+
+class Options(Enum):
+    """Opções disponíveis no menu principal."""
+    SAIR = "0"
+    INSTANCIA = "1"
+    SERVIDOR = "2"
+    CRIAR_ENV = "3"
 
 class Menu:
     def __init__(self):
@@ -118,5 +126,5 @@ class Menu:
         commons.status.check_server_status()
 
     def create_env(self):
-        print("Criando arquivo .env...")
-        # Implementação para criar o .env
+        import commons.configs.configs
+        commons.configs.configs.generate_env_file()

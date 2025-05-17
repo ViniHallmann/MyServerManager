@@ -12,7 +12,8 @@ class Menu:
         self.server_commands: Dict[str, Callable] = {
             "1": self.start_server,
             "2": self.stop_server,
-            "3": self.check_server_status
+            "3": self.check_server_status,
+            "4": self.check_player_count
         }
         self.SELECTED_GAME: Optional[str] = None
 
@@ -50,6 +51,7 @@ class Menu:
             print("1. Iniciar servidor")
             print("2. Parar servidor")
             print("3. Verificar status do servidor")
+            print("4. Verificar contagem de jogadores")
             
         print("0. Voltar")
         print("=" * 50)
@@ -120,3 +122,7 @@ class Menu:
     def create_env(self):
         print("Criando arquivo .env...")
         # Implementação para criar o .env
+
+    def check_player_count(self):
+        import commons.status
+        commons.status.get_player_count()

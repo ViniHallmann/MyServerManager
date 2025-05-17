@@ -45,6 +45,33 @@ def check_server_status() -> None:
     except Exception as e:
         print(f"Erro: {e}")
 
+def get_player_count() -> None:
+    config: dict = load_config()
+    ec2: BaseClient = boto3.client("ec2")
+    AWS: AWSUtils   = AWSUtils(ec2)
+
+    try:
+        if not AWS.is_instance_running( config["INSTANCE_ID"] ):
+            print("Instância está parada.")
+            return
+
+        ip: str = AWS.get_instance_ip( config["INSTANCE_ID"] )
+        if ip == "IP não encontrado": raise ValueError("Não foi possível obter o IP da instância.")
+
+        print("Conectando ao servidor...")
+        SSH: SSHUtils = SSHUtils(ip, config["KEY_PATH"], config["USER"])
+        if not SSH.connect():
+            print("Falha ao conectar via SSH.")
+            return False
+
+        print("Verificando contagem de jogadores...")
+        response = SSH.execute_command( config["PLAYER_COUNT_COMMAND"] )
+        print(response)
+    
+    except Exception as e:
+        print(f"Erro: {e}")
+    
+
 
 
 def stop_instance() -> None:

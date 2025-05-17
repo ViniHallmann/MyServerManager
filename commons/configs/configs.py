@@ -30,7 +30,8 @@ def load_config() -> dict:
         "KEY_PATH":         os.getenv("KEY_PATH"),
         "USER":             os.getenv("USER", "ubuntu"),
         "STOP_COMMAND":     os.getenv("STOP_COMMAND"),
-        "START_COMMAND":    os.getenv("START_COMMAND")
+        "START_COMMAND":    os.getenv("START_COMMAND"),
+        "PLAYER_COUNT_COMMAND": os.getenv("PLAYER_COUNT_COMMAND")
     }
     
     ##verify_config_variables(config)

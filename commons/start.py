@@ -1,8 +1,8 @@
 import boto3
 from botocore.client    import BaseClient
-from commons.utils.aws          import AWSUtils 
-from commons.utils.ssh          import SSHUtils 
-from commons.configs            import load_config
+from commons.utils.aws  import AWSUtils 
+from commons.utils.ssh  import SSHUtils 
+from commons.configs    import load_config
 
 #todo: criar função para verificar janela do servidor antes de iniciar o servidor
 

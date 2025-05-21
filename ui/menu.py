@@ -1,7 +1,7 @@
 import os
 from enum import Enum
 from typing import Dict, Callable, Optional
-from variables.globals import set_selected_game, get_selected_game
+from variables.globals import set_selected_server, get_selected_server
 
 class Options(Enum):
     """Opções disponíveis no menu principal."""
@@ -27,19 +27,19 @@ class Menu:
             "2": self.stop_server,
             "3": self.check_server_status
         }
-        self._selected_game: Optional[str] = None
+        self._selected_server: Optional[str] = None
 
 
     @property
-    def selected_game(self) -> Optional[str]:
+    def selected_server(self) -> Optional[str]:
         """Retorna o jogo atualmente selecionado."""
-        return self._selected_game
+        return self._selected_server
     
-    @selected_game.setter
-    def selected_game(self, game: str) -> None:
+    @selected_server.setter
+    def selected_server(self, server: str) -> None:
         """Define o jogo atualmente selecionado."""
-        self._selected_game = game
-        set_selected_game(game)
+        self._selected_server = server
+        set_selected_server(server)
         
 
     @staticmethod
@@ -54,23 +54,26 @@ class Menu:
         print("=" * 50)
 
     def show_game_selection(self) -> None:
-        self.show_header("MENU - SELECIONE O JOGO")
+        self.show_header("MENU - SELECIONE O SERVIDOR")
         print("1. Zomboid")
         print("2. Minecraft")
+        print("3. N8N")
+        print("0. Sair")
         print("=" * 50)
 
     def show_main_menu(self) -> None:
         """Exibe o menu principal."""
-        self.show_header(f"MENU PRINCIPAL - {self.selected_game.upper()}")
+        self.show_header(f"MENU PRINCIPAL - {self.select_server.upper()}")
         print("1. Gerenciar instância EC2")
-        print("2. Gerenciar servidor")
+        if self.selected_server != "N8N":
+            print("2. Gerenciar servidor")
         print("3. Criar .env")
         print("0. Sair")
         print("=" * 50)
 
     def show_submenu(self, menu_type: str) -> None:
         """Exibe o submenu de gerenciamento de instância ou servidor."""
-        self.show_header(f"SUBMENU - {menu_type.upper()} - {self.selected_game.upper()}")
+        self.show_header(f"SUBMENU - {menu_type.upper()} - {self.select_server.upper()}")
         
         if menu_type == "instancia":
             print("1. Iniciar instância EC2")
@@ -84,23 +87,30 @@ class Menu:
         print("0. Voltar")
         print("=" * 50)
 
-    def select_game(self) -> bool:
-        """Permite ao usuário selecionar um jogo."""
+    def select_server(self) -> bool:
+        """Permite ao usuário selecionar um servidor."""
         self.clear_screen()
         self.show_game_selection()
-        choice = input("\nEscolha o jogo: ")
+        choice = input("\nEscolha um server: ")
         
         if choice == "1":
-            set_selected_game("Zomboid")
-            self.selected_game = "Zomboid"
+            set_selected_server("Zomboid")
+            self.select_server = "Zomboid"
             return True
         elif choice == "2":
-            set_selected_game("Minecraft")
-            self.selected_game = "Minecraft"
+            set_selected_server("Minecraft")
+            self.select_server = "Minecraft"
             return True
-        
-        print("Opção inválida.")
-        return False
+        elif choice == "3":
+            set_selected_server("N8N")
+            self.select_server = "N8N"
+            return True
+        elif choice == "0":
+            print("Saindo...")
+            return False
+        else:
+            print("Opção inválida.")
+            return False
     
     def set_commands(self, menu_type: MenuType) -> Dict[str, Callable]:
         """Define os comandos disponíveis para o submenu selecionado."""

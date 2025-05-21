@@ -10,8 +10,8 @@ def main() -> NoReturn:
     """
     try:
         menu = Menu()
-        if not menu.select_game():
-            print("Nenhum jogo selecionado. Encerrando...")
+        if not menu.select_server():
+            print("Nenhum servidor selecionado. Encerrando...")
             sys.exit(0)
         
         while True:
